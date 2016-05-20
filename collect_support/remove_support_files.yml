@@ -1,0 +1,28 @@
+- hosts: all
+  remote_user: cumulus
+  become_method: sudo
+  become: yes
+  vars:
+    ansible_user: "cumulus"
+    ansible_ssh_pass: "CumulusLinux!"
+    ansible_become_pass: "CumulusLinux!"
+  vars_prompt:
+
+  - name: "are_you_sure"
+    prompt: "Are you REALLY sure you want to delete the files?"
+    default: "no"
+    private: no
+
+  tasks:
+    - debug: msg="{{ are_you_sure }}"
+
+    - debug: msg="Waiting 15 Seconds to make sure that you're really sure..."
+      failed_when: "'yes' not in are_you_sure"
+
+    - wait_for: timeout=15
+
+    - name: Removing CL-Support files
+      shell: rm -v /var/support/cl_support*
+      register: debug_output
+
+    - debug: msg=" {{ debug_output.stdout }} "

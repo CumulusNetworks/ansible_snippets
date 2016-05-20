@@ -1,0 +1,30 @@
+- hosts: all
+  remote_user: cumulus
+  become_method: sudo
+  become: yes
+  vars:
+    ansible_user: "cumulus"
+    ansible_ssh_pass: "CumulusLinux!"
+    ansible_become_pass: "CumulusLinux!"
+    destination_dir: "./collected_cl_supports/"
+  tasks:
+    - name: create config folder locally
+      file: path={{destination_dir}} state=directory recurse=yes mode=0777
+      delegate_to: localhost
+
+    - name: run cl-support
+      command: /usr/cumulus/bin/cl-support
+
+    - name: determine newly created support file
+      shell: ls -lt /var/support/cl_support* | head -n2 | tail -n1 | awk '{print $9}'
+      register: new_support_file
+
+    - debug: msg="###############################################################"
+    - debug: msg="New support file is {{ new_support_file.stdout }}"
+    - debug: msg="Destination Directory is {{ destination_dir }}"
+    - debug: msg="###############################################################"
+
+    - name: collect support file
+      when: new_support_file.stdout.find('cl_support') != -1
+      fetch: src={{ new_support_file.stdout }} dest={{ destination_dir }} flat=yes fail_on_missing=yes
+
