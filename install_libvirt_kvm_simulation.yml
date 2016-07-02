@@ -1,0 +1,22 @@
+- hosts: all
+  tasks:
+    - name: Download Vagrant (/w Checksum Verification)
+      get_url: url=https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4_x86_64.deb  dest=/home/{{ansible_ssh_user}}/vagrant_v1.8.4.deb checksum=sha256:fd38d8e00e494a617201facb42fc2cac627e5021db15e91c2a041eac6a2d8208
+    - name: Install Vagrant
+      apt: deb="/home/{{ ansible_ssh_user}}/vagrant_v1.8.4.deb"
+      become: yes
+    - name: Install libvirt and QEMU
+      apt: name={{item}} update_cache=yes
+      with_items:
+        - libvirt-bin
+        - libvirt-dev
+        - qemu-utils
+        - qemu
+      become: yes
+    - name: Install Vagrant Plugins (Mutate,Cumulus,Libvirt)
+      shell: vagrant plugin install vagrant-cumulus vagrant-mutate vagrant-libvirt
+      become: yes
+    - name: Add Cumulus Vagrant Box
+      shell: vagrant box add CumulusCommunity/VX-3.0
+    - name: Mutate the Cumulus Box to be used with libvirt
+      shell: vagrant mutate CumulusCommunity/VX-3.0 libvirt
