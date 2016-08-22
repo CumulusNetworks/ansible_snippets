@@ -1,22 +1,51 @@
+---
 - hosts: all
   tasks:
-    - name: Download Vagrant (/w Checksum Verification)
-      get_url: url=https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4_x86_64.deb  dest=/home/{{ansible_ssh_user}}/vagrant_v1.8.4.deb checksum=sha256:fd38d8e00e494a617201facb42fc2cac627e5021db15e91c2a041eac6a2d8208
-    - name: Install Vagrant
-      apt: deb="/home/{{ ansible_ssh_user}}/vagrant_v1.8.4.deb"
-      become: yes
-    - name: Install libvirt and QEMU
-      apt: name={{item}} update_cache=yes
-      with_items:
-        - libvirt-bin
-        - libvirt-dev
-        - qemu-utils
-        - qemu
-      become: yes
-    - name: Install Vagrant Plugins (Mutate,Cumulus,Libvirt)
-      shell: vagrant plugin install vagrant-cumulus vagrant-mutate vagrant-libvirt
-      become: yes
+  - name: "Determining Whether Host is Supported or Not..."
+    command: uname -a
+    failed_when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04") and
+                 (ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04") and
+
+
+  - name: Add additional repo for libvirt tunnels
+    apt_repository: repo='ppa:linuxsimba/libvirt-udp-tunnel'
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+  - name: Run apt-get update
+    apt: update_cache=yes
+
+  - name: Install packages for Libvirt and QEMU
+    apt: name={{item}} state=present
+    with_items:
+      - libvirt-bin
+      - libvirt-dev
+      - qemu-utils
+      - qemu
+
+  - name: Apply virsh commands
+    command: "{{ item }}"
+    with_items:
+      - virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
+      - virsh pool-autostart default
+      # - virsh pool-build default
+      - virsh pool-start default
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
+
+  - name: Install latest Vagrant (1.8.5 as of Aug 2016)
+    apt: deb=https://releases.hashicorp.com/vagrant{{ item }}/vagrant_{{ item }}_x86_64.deb
+    with_items:
+      - 1.8.5
+
+  - name: Install plugins for libvirt
+    command: "vagrant plugin install {{ item }}"
+    with_items:
+      - vagrant-cumulus
+      - vagrant-mutate
+      - vagrant-libvirt
+
     - name: Add Cumulus Vagrant Box
-      shell: vagrant box add CumulusCommunity/VX-3.0
+      shell: vagrant box add CumulusCommunity/cumulus-vx
+
     - name: Mutate the Cumulus Box to be used with libvirt
-      shell: vagrant mutate CumulusCommunity/VX-3.0 libvirt
+      shell: vagrant mutate CumulusCommunity/cumulus-vx libvirt
+
