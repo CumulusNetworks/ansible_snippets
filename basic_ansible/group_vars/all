@@ -1,0 +1,58 @@
+# services
+ntp_server: pool.ntp.org
+syslog_server: 192.168.0.254
+# networking
+networks:
+    "172.16.1.0/24":
+        source: "leaf01"
+    "172.16.2.0/24":
+        source: "leaf02"
+interfaces:
+    leaf01:
+        loopback: "10.0.0.11"
+        asn: 65011
+        networks:
+            br0:
+                ip: "172.16.1.1/24"
+                ports: ["swp1"]
+        neighbors:
+            swp51:
+            swp52:
+    leaf02:
+        loopback: "10.0.0.12"
+        asn: 65012
+        networks:
+            br0:
+                ip: "172.16.2.1/24"
+                ports: ["swp2"]
+        neighbors:
+            swp51:
+            swp52:
+    spine01:
+        loopback: "10.0.0.21"
+        asn: 65020
+        neighbors:
+            swp1:
+            swp2:
+            swp3:
+            swp4:
+    spine02:
+        loopback: "10.0.0.22"
+        asn: 65020
+        neighbors:
+            swp1:
+            swp2:
+            swp3:
+            swp4:
+    server01:
+        neighbors:
+            eth1:
+                ip: "172.16.1.101"
+                mask: "255.255.255.0"
+                gateway: "172.16.1.1"
+    server02:
+        neighbors:
+            eth2:
+                ip: "172.16.2.101"
+                mask: "255.255.255.0"
+                gateway: "172.16.2.1"

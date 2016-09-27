@@ -1,0 +1,7 @@
+
+# This handler reloads ifupdown2, which comes standard on cumulus switches.
+# ifupdown2 is much smarter than its predecessor and as such reloading is painless.
+# Note that the -a means "auto" - this command only reloads interfaces that are
+# marked with the auto keyword.
+- name: reload networking
+  command: ifreload -a

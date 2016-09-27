@@ -1,0 +1,24 @@
+---
+- hosts: leaf
+  user: cumulus
+  become: yes
+  become_method: sudo
+  roles:
+    - ifupdown2
+    - quagga
+
+- hosts: spine
+  user: cumulus
+  become: yes
+  become_method: sudo
+  roles:
+    - ifupdown2
+    - quagga
+
+- hosts: server
+  user: cumulus
+  become: yes
+  become_method: sudo
+  roles:
+    - ifupdown
+

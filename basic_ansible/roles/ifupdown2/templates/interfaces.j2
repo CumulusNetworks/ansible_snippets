@@ -1,0 +1,29 @@
+{% set intvars = interfaces[ansible_hostname] %}
+# /etc/network/interfaces template for switches ({{ansible_hostname}})
+# Created by Ansible
+
+auto lo
+iface lo inet loopback
+  address {{ intvars.loopback }}/32
+
+auto eth0
+iface eth0 inet dhcp
+
+
+{% for iface in intvars.neighbors %}
+auto {{ iface }}
+iface {{ iface }}
+{% endfor %}
+
+
+{% for network in intvars.networks | default(()) %}
+{% for port in intvars.networks[network].ports %}
+auto {{ port }}
+iface {{ port }}
+
+{% endfor %}
+auto {{ network }}
+iface {{ network }}
+    bridge-ports {{ " ".join(intvars.networks[network].ports) }}
+    address {{ intvars.networks[network].ip }}
+{% endfor %}

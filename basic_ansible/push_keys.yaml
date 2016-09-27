@@ -1,0 +1,16 @@
+
+- hosts: all         # Run this against all Hosts in the ansible inventory file
+  become: yes        # Becomes the Root user during execution on the remote device
+  gather_facts: no   # Don't query the remote node for any identifying information before running tasks
+  tasks:             # All of these tasks are executed on the remote device
+    - name: Make a ".ssh" Directory for the Cumulus user
+      file: path=/home/cumulus/.ssh state=directory mode=0755
+
+    - name: Copy our Authorized Key to the Cumulus user
+      copy: src=/home/cumulus/.ssh/id_rsa.pub dest=/home/cumulus/.ssh/authorized_keys
+
+    - name: Make a ".ssh" Directory for the Root user
+      file: path=/root/.ssh state=directory mode=0755
+
+    - name: Copy our Authorized Key to the Root user
+      copy: src=/home/cumulus/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys

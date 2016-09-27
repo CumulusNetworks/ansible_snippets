@@ -1,0 +1,15 @@
+---
+- hosts: all
+  user: cumulus
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Write Timezone File
+      # Choose a Timezone from the list here --> https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      lineinfile: dest=/etc/timezone line="America/New York"
+
+    - name: Apply Timezone
+      shell: /usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata
+
+    - name: Generate and Push NTP Config File
+      template: src=./files/ntp.conf.j2 dest=/etc/ntp.conf

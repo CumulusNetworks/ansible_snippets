@@ -1,0 +1,6 @@
+
+# This handler attempts to reload legacy ifupdown. However, when making substantial
+# changes to the networking stack such as changing routes, etc, sometimes this
+# command fails and the only solution is to reboot the server.
+- name: reload networking legacy
+  shell: ifdown --force -a && ifup --force -a

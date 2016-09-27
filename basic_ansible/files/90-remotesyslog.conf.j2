@@ -1,0 +1,6 @@
+
+## File Managed by Ansible ##
+## Copy all messages to the remote syslog servers indicated below
+{% if syslog_server is defined -%}
+*.*                             @{{ syslog_server }}
+{% endif -%}

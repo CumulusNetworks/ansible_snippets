@@ -1,0 +1,14 @@
+---
+- hosts: all
+  user: cumulus
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Configure MOTD
+      copy: src=./files/motd dest=/etc/motd
+
+    - name: Configure Login Warning Message (Banner)
+      copy: src=./files/banner dest=/etc/issue.net
+
+    - name: Enable Usage of Banner by SSH
+      lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" regexp=^.*Banner
