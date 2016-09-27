@@ -1,11 +1,13 @@
 ---
 - hosts: all
+  vars:
+    vagrant_vers: 1.8.5
+    vagrant_url: https://releases.hashicorp.com/vagrant/{{ vagrant_vers }}/vagrant_{{ vagrant_vers }}_x86_64.deb
   tasks:
   - name: "Determining Whether Host is Supported or Not..."
     command: uname -a
     failed_when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04") and
                  (ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04")
-
 
   - name: Add additional repo for libvirt tunnels
     apt_repository: repo='ppa:linuxsimba/libvirt-udp-tunnel'
@@ -31,11 +33,14 @@
       - virsh pool-start default
     when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
-  - name: Install latest Vagrant (1.8.5 as of Aug 2016)
-    apt: deb=https://releases.hashicorp.com/vagrant{{ item }}/vagrant_{{ item }}_x86_64.deb
-    with_items:
-      - 1.8.5
+- name: Download Vagrant DEB
+  get_url: 
+    url="{{vagrant_url}}"
+    dest="/home/{{ ansible_env.USER }}/"
 
+  - name: Install latest Vagrant (1.8.5 as of Aug 2016)
+    apt: deb=/home/{{ ansible_env.USER }}/vagrant_{{ vagrant_vers }}_x86_64.deb
+    
   - name: Install plugins for libvirt
     command: "vagrant plugin install {{ item }}"
     with_items:
