@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  user: cumulus
+  remote_user: cumulus
   become: yes
   become_method: sudo
   tasks:

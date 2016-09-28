@@ -1,6 +1,6 @@
 ---
 - hosts: leaf
-  user: cumulus
+  remote_user: cumulus
   become: yes
   become_method: sudo
   roles:
@@ -8,7 +8,7 @@
     - quagga
 
 - hosts: spine
-  user: cumulus
+  remote_user: cumulus
   become: yes
   become_method: sudo
   roles:
@@ -16,7 +16,7 @@
     - quagga
 
 - hosts: server
-  user: cumulus
+  remote_user: cumulus
   become: yes
   become_method: sudo
   roles:

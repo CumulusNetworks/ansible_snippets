@@ -1,11 +1,11 @@
 [server]
-server01
-server02
+server01 ansible_user=cumulus
+server02 ansible_user=cumulus
 
 [spine]
-spine01
-spine02
+spine01 ansible_user=cumulus
+spine02 ansible_user=cumulus
 
 [leaf]
-leaf01
-leaf02
+leaf01 ansible_user=cumulus
+leaf02 ansible_user=cumulus
