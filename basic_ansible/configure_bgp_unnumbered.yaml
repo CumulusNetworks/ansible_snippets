@@ -1,13 +1,5 @@
 ---
-- hosts: leaf
-  remote_user: cumulus
-  become: yes
-  become_method: sudo
-  roles:
-    - ifupdown2
-    - quagga
-
-- hosts: spine
+- hosts: leaf:spine
   remote_user: cumulus
   become: yes
   become_method: sudo
@@ -21,4 +13,5 @@
   become_method: sudo
   roles:
     - ifupdown
+
 

@@ -1,0 +1,98 @@
+---
+- hosts: all            # Run this against all Hosts in the ansible inventory file
+  become: yes           # Becomes the Root user during execution on the remote device
+  remote_user: cumulus  # Specifying the Remote User used for SSH
+  gather_facts: no      # Don't query the remote node for any identifying information before running tasks
+  vars:
+    ansible_user: "cumulus"
+    ansible_ssh_pass: "CumulusLinux!"
+    ansible_become_pass: "CumulusLinux!"
+  tasks:                # All of these tasks are executed on the remote device
+    - name: GENERATE SSH KEY
+      shell: ls /home/vagrant/.ssh/id_rsa || /usr/bin/ssh-keygen -b 2048 -t rsa -f /home/vagrant/.ssh/id_rsa -q -N ""
+      become: no
+      delegate_to: localhost
+      ignore_errors: yes
+
+    - name: Make a ".ssh" Directory for the Cumulus user
+      file: path=/home/cumulus/.ssh state=directory mode=0755
+
+    - name: Copy our Authorized Key to the Cumulus user
+      copy: src=/home/vagrant/.ssh/id_rsa.pub dest=/home/cumulus/.ssh/authorized_keys
+
+    - name: Make a ".ssh" Directory for the Root user
+      file: path=/root/.ssh state=directory mode=0755
+
+    - name: Copy our Authorized Key to the Root user
+      copy: src=/home/vagrant/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys
+
+
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Write the Hostname to File
+      shell: echo "{{ inventory_hostname }}" > /etc/hostname
+
+    - name: Apply Hostname
+      shell: hostname -F /etc/hostname
+
+    - name: Add Local DNS Resolution for our Hostname
+      lineinfile: dest=/etc/hosts line="127.0.1.1    {{inventory_hostname}}" regexp=^.*127.0.1.1
+
+
+
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Configure MOTD
+      copy: src=./files/motd dest=/etc/motd
+
+    - name: Configure Login Warning Message (Banner)
+      copy: src=./files/banner dest=/etc/issue.net
+
+    - name: Enable Usage of Banner by SSH
+      lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" regexp=^.*Banner
+
+    - name: Restart SSH Daemon
+      service: name=ssh state=restarted
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Install NTP
+      apt: name=ntp update_cache=yes
+
+    - name: Write Timezone File
+      # Choose a Timezone from the list here --> https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      lineinfile: dest=/etc/timezone line="America/New York"
+
+    - name: Apply Timezone
+      shell: /usr/sbin/dpkg-reconfigure --frontend noninteractive tzdata
+
+    - name: Generate and Push NTP Config File
+      template: src=./files/ntp.conf.j2 dest=/etc/ntp.conf
+
+
+- hosts: leaf:spine
+  remote_user: cumulus
+  become: yes
+  become_method: sudo
+  roles:
+    - ifupdown2
+    - quagga
+
+- hosts: server
+  remote_user: cumulus
+  become: yes
+  become_method: sudo
+  roles:
+    - ifupdown
+
+

@@ -1,6 +1,7 @@
 ---
 - hosts: all
   remote_user: cumulus
+  gather_facts: no
   become: yes
   tasks:
     - name: Write the Hostname to File
@@ -11,4 +12,6 @@
 
     - name: Add Local DNS Resolution for our Hostname
       lineinfile: dest=/etc/hosts line="127.0.1.1    {{inventory_hostname}}" regexp=^.*127.0.1.1
+
+
 

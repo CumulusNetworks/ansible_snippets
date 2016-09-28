@@ -1,4 +1,4 @@
-
+---
 - hosts: all            # Run this against all Hosts in the ansible inventory file
   become: yes           # Becomes the Root user during execution on the remote device
   remote_user: cumulus  # Specifying the Remote User used for SSH
@@ -9,8 +9,10 @@
     ansible_become_pass: "CumulusLinux!"
   tasks:                # All of these tasks are executed on the remote device
     - name: GENERATE SSH KEY
-      shell: ls /home/vagrant/.ssh/id_rsa.pub || /usr/bin/ssh-keygen -b 2048 -t rsa -f /home/vagrant/.ssh/id_rsa -q -N ""
+      shell: ls /home/vagrant/.ssh/id_rsa || /usr/bin/ssh-keygen -b 2048 -t rsa -f /home/vagrant/.ssh/id_rsa -q -N ""
+      become: no
       delegate_to: localhost
+      ignore_errors: yes
 
     - name: Make a ".ssh" Directory for the Cumulus user
       file: path=/home/cumulus/.ssh state=directory mode=0755
