@@ -58,7 +58,7 @@ Install the prerequisites mentioned above.
 
 **Linux:** Make sure you already have Git installed and clone the repository
 
-    $ git clone https://github.com/cumulusnetworks/cldemo-vagrant or running the following command on a Linux
+    $ git clone https://github.com/cumulusnetworks/cldemo-vagrant
 
 ### Deploy the Virtual Topology
 
