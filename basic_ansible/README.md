@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repo contains some examples of how to deploy configurations and automation to virtual infrastructure.
+This repo contains some examples of how to deploy configurations and automation to virtual infrastructure. This demonstration is part of the ["Agile Network Deployment" webinar](http://go.cumulusnetworks.com/wbr-agile-deployment)
 
 
 ## Virtualizing a Network with Cumulus VX
