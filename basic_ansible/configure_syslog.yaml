@@ -1,0 +1,14 @@
+---
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Configure Syslog
+      template: src=./files/90-remotesyslog.conf.j2 dest=/etc/rsyslog.d/90-remotesyslog.conf
+      
+    - name: Restart Syslog Service
+      service: name=rsyslog state=restarted
+
+

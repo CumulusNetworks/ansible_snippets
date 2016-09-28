@@ -31,6 +31,19 @@
   remote_user: cumulus
   gather_facts: no
   become: yes
+  become_method: sudo
+  tasks:
+    - name: Configure Syslog
+      template: src=./files/90-remotesyslog.conf.j2 dest=/etc/rsyslog.d/90-remotesyslog.conf
+
+    - name: Restart Syslog Service
+      service: name=rsyslog state=restarted
+
+
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
   tasks:
     - name: Write the Hostname to File
       shell: echo "{{ inventory_hostname }}" > /etc/hostname
@@ -41,6 +54,20 @@
     - name: Add Local DNS Resolution for our Hostname
       lineinfile: dest=/etc/hosts line="127.0.1.1    {{inventory_hostname}}" regexp=^.*127.0.1.1
 
+
+- hosts: leaf:spine
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars:
+    - license: "email@address.com|THISisAfakeLICENSE"
+  tasks:
+    - name: Apply the License
+      shell: echo "{{ license }}" | cl-license -i 
+
+    - name: Restart Switchd
+      service: name=switchd state=restarted
 
 
 - hosts: all
@@ -60,6 +87,8 @@
 
     - name: Restart SSH Daemon
       service: name=ssh state=restarted
+
+
 - hosts: all
   remote_user: cumulus
   gather_facts: no
@@ -79,20 +108,80 @@
     - name: Generate and Push NTP Config File
       template: src=./files/ntp.conf.j2 dest=/etc/ntp.conf
 
+    - name: Restart NTP Service           
+      service: name=ntp state=restarted
+
+
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Configure Syslog
+      template: src=./files/90-remotesyslog.conf.j2 dest=/etc/rsyslog.d/90-remotesyslog.conf
+      
+    - name: Restart Syslog Service
+      service: name=rsyslog state=restarted
+
 
 - hosts: leaf:spine
   remote_user: cumulus
   become: yes
   become_method: sudo
-  roles:
-    - ifupdown2
-    - quagga
+  tasks:
+    # This task configures /etc/network/interfaces on ifupdown2. The variables for
+    # which interfaces are neighbors and networks come from the group_vars/all file.
+    - name: Generate Interface Configuration
+      template: src=./files/switch_interfaces.j2 dest=/etc/network/interfaces
+
+    # This handler reloads ifupdown2, which comes standard on cumulus switches.
+    # ifupdown2 is much smarter than its predecessor and as such reloading is painless.
+    # Note that the -a means "auto" - this command only reloads interfaces that are
+    # marked with the auto keyword.
+    - name: Reload the Networking Configuration
+      command: ifreload -a
+
+    # This step ensures that the quagga daemon is running.
+    - name: Ensure Quagga is Started
+      service: name=quagga state=started
+
+    # The quagga daemons file is a static file that specifies which subdaemons
+    # are actually running (zebra, bgpd, ospf). This file is not required when
+    # Quagga is being run using systemd.
+    - name: Enable Individual Routing Protocol Daemons
+      copy: src=./files/daemons dest=/etc/quagga/daemons
+
+    # This writes configuration to the Quagga configuration file using the
+    # information in group_vars/all. 
+    - name: Generate Quagga Configuration
+      template: src=./files/Quagga.conf.j2 dest=/etc/quagga/Quagga.conf
+
+    # This command checks quagga before restarting it, just in case there are syntax
+    # errors. The dryrun command will have output if there are problems, so this
+    # short shell scripts fails and stops ansible if there is any output.
+    - name: Check Quagga.conf File for Syntax
+      shell: bash -c '[[ -z $(vtysh -f /etc/quagga/Quagga.conf --dryrun) ]]'
+
+    # This command actually restarts quagga. This command will actually drop all
+    # routes currently in progress, so this will interrupt networking currently in
+    # place.
+    - name: Restart Quagga Service
+      service: name=quagga state=restarted
 
 - hosts: server
   remote_user: cumulus
   become: yes
   become_method: sudo
-  roles:
-    - ifupdown
+  tasks:
+    # This configures legacy ifupdown interfaces and sets the default internal route to point
+    # to the leafs. If the configuration changes, ifupdown will be reloaded.
+    - name: configure /etc/network/interfaces on the host (using legacy ifupdown)
+      template: src=./files/server_interfaces.j2 dest=/etc/network/interfaces
 
+    # This command attempts to reload legacy ifupdown. However, when making substantial
+    # changes to the networking stack such as changing routes, etc, sometimes this
+    # command fails and the only solution is to reboot the server.
+    - name: reload networking legacy
+      shell: ifdown --force -a && ifup --force -a
 

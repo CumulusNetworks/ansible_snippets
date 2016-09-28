@@ -1,0 +1,16 @@
+---
+- hosts: leaf:spine
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  vars:
+    - license: "email@address.com|THISisAfakeLICENSE"
+  tasks:
+    - name: Apply the License
+      shell: echo "{{ license }}" | cl-license -i 
+
+    - name: Restart Switchd
+      service: name=switchd state=restarted
+
+

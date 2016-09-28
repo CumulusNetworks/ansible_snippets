@@ -1,5 +1,6 @@
-
 ## File Managed by Ansible ##
+## /etc/rsyslog.d/90-remotesyslog.conf
+
 ## Copy all messages to the remote syslog servers indicated below
 {% if syslog_server is defined -%}
 *.*                             @{{ syslog_server }}
