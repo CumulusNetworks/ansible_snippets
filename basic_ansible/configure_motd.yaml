@@ -12,3 +12,6 @@
 
     - name: Enable Usage of Banner by SSH
       lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" regexp=^.*Banner
+
+    - name: Restart SSH Daemon
+      service: name=ssh state=restarted

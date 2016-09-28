@@ -3,6 +3,16 @@
   become: yes        # Becomes the Root user during execution on the remote device
   gather_facts: no   # Don't query the remote node for any identifying information before running tasks
   tasks:             # All of these tasks are executed on the remote device
+    - name: Check to see if SSH Keyfile Exists
+      stat: path=/home/cumulus/.ssh/id_rsa.pub
+      register: ssh_keyfile
+      delegate_to: localhost
+
+    - name: GENERATE SSH KEY
+      shell: /usr/bin/ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+      when: ssh_keyfile.stat.exists == False
+      delegate_to: localhost
+
     - name: Make a ".ssh" Directory for the Cumulus user
       file: path=/home/cumulus/.ssh state=directory mode=0755
 
@@ -14,3 +24,4 @@
 
     - name: Copy our Authorized Key to the Root user
       copy: src=/home/cumulus/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys
+

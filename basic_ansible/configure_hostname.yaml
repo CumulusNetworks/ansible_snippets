@@ -2,14 +2,12 @@
 - hosts: all
   user: cumulus
   become: yes
-  become_method: sudo
   tasks:
     - name: Write the Hostname to File
-      shell: echo "{{inventory_hostname}}" > /etc/hostname
+      shell: echo "{{ inventory_hostname }}" > /etc/hostname
 
     - name: Apply Hostname
       shell: hostname -F /etc/hostname
-      lineinfile: dest=/etc/ssh/sshd_config line="Banner /etc/issue.net" regexp=^.*Banner
 
     - name: Add Local DNS Resolution for our Hostname
       lineinfile: dest=/etc/hosts line="127.0.1.1    {{inventory_hostname}}" regexp=^.*127.0.1.1
