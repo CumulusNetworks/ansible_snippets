@@ -1,0 +1,13 @@
+---
+- hosts: leaf:spine
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Copy the PTM Topology File
+      copy: src=./files/topology.dot dest=/etc/ptm.d/topology.dot
+
+    - name: Restart PTM Service    
+      service: name=ptmd state=restarted
+

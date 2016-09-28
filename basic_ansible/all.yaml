@@ -26,6 +26,18 @@
     - name: Copy our Authorized Key to the Root user
       copy: src=/home/vagrant/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys
 
+- hosts: leaf:spine
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Copy the PTM Topology File
+      copy: src=./files/topology.dot dest=/etc/ptm.d/topology.dot
+
+    - name: Restart PTM Service    
+      service: name=ptmd state=restarted
+
 
 - hosts: all
   remote_user: cumulus

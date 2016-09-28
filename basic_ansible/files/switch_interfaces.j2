@@ -4,19 +4,23 @@
 
 auto lo
 iface lo inet loopback
-  address {{ intvars.loopback }}/32
+    alias LOOPBACK
+    address {{ intvars.loopback }}/32
 
 auto eth0
 iface eth0 inet dhcp
+    alias MGMT Interface
 
 
+# BGP Peers
 {% for iface in intvars.neighbors %}
 auto {{ iface }}
 iface {{ iface }}
+
 {% endfor %}
 
-
 {% for network in intvars.networks | default(()) %}
+# Host Facing Ports
 {% for port in intvars.networks[network].ports %}
 auto {{ port }}
 iface {{ port }}
