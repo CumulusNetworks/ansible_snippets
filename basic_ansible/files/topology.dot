@@ -35,14 +35,14 @@ graph vx {
  "exit01":"swp49" -- "exit02":"swp49"
  "exit01":"swp50" -- "exit02":"swp50"
 
- "server01":"eth1" -- "leaf01":"swp1"
- "server01":"eth2" -- "leaf02":"swp1"
- "server02":"eth1" -- "leaf01":"swp2"
- "server02":"eth2" -- "leaf02":"swp2"
- "server03":"eth1" -- "leaf03":"swp1"
- "server03":"eth2" -- "leaf04":"swp1"
- "server04":"eth1" -- "leaf03":"swp2"
- "server04":"eth2" -- "leaf04":"swp2"
+ "server01":"eth1" -- "leaf01":"swp1" [LLDP="match_type=portdescr"]
+ "server01":"eth2" -- "leaf02":"swp1" [LLDP="match_type=portdescr"]
+ "server02":"eth1" -- "leaf01":"swp2" [LLDP="match_type=portdescr"]
+ "server02":"eth2" -- "leaf02":"swp2" [LLDP="match_type=portdescr"]
+ "server03":"eth1" -- "leaf03":"swp1" [LLDP="match_type=portdescr"]
+ "server03":"eth2" -- "leaf04":"swp1" [LLDP="match_type=portdescr"]
+ "server04":"eth1" -- "leaf03":"swp2" [LLDP="match_type=portdescr"]
+ "server04":"eth2" -- "leaf04":"swp2" [LLDP="match_type=portdescr"]
 
  "exit01":"swp51" -- "spine01":"swp30"
  "exit01":"swp52" -- "spine02":"swp30"
