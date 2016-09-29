@@ -48,9 +48,8 @@
       - vagrant-mutate
       - vagrant-libvirt
 
-    - name: Add Cumulus Vagrant Box
-      shell: vagrant box add CumulusCommunity/cumulus-vx
+  - name: Add Cumulus Vagrant Box
+    shell: vagrant box add CumulusCommunity/cumulus-vx
 
-    - name: Mutate the Cumulus Box to be used with libvirt
-      shell: vagrant mutate CumulusCommunity/cumulus-vx libvirt
-
+  - name: Mutate the Cumulus Box to be used with libvirt
+    shell: vagrant mutate CumulusCommunity/cumulus-vx libvirt
