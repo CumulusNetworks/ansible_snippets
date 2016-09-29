@@ -34,19 +34,20 @@
     when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
   - name: Download Vagrant DEB
-    get_url: 
+    get_url:
       url="{{vagrant_url}}"
       dest="/home/{{ ansible_env.USER }}/"
 
   - name: Install latest Vagrant (1.8.5 as of Aug 2016)
     apt: deb=/home/{{ ansible_env.USER }}/vagrant_{{ vagrant_vers }}_x86_64.deb
-    
+
   - name: Install plugins for libvirt
     command: "vagrant plugin install {{ item }}"
     with_items:
       - vagrant-cumulus
       - vagrant-mutate
       - vagrant-libvirt
+
   - name: Add Cumulus Vagrant Box
     shell: vagrant box add CumulusCommunity/cumulus-vx
 
