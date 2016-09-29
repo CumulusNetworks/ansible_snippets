@@ -34,7 +34,7 @@
     when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04"
 
   - name: Download Vagrant DEB
-  get_url: 
+    get_url: 
     url="{{vagrant_url}}"
     dest="/home/{{ ansible_env.USER }}/"
 
