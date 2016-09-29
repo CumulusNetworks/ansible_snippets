@@ -47,7 +47,6 @@
       - vagrant-cumulus
       - vagrant-mutate
       - vagrant-libvirt
-
   - name: Add Cumulus Vagrant Box
     shell: vagrant box add CumulusCommunity/cumulus-vx
 
