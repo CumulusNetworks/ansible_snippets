@@ -35,8 +35,8 @@
 
   - name: Download Vagrant DEB
     get_url: 
-    url="{{vagrant_url}}"
-    dest="/home/{{ ansible_env.USER }}/"
+      url="{{vagrant_url}}"
+      dest="/home/{{ ansible_env.USER }}/"
 
   - name: Install latest Vagrant (1.8.5 as of Aug 2016)
     apt: deb=/home/{{ ansible_env.USER }}/vagrant_{{ vagrant_vers }}_x86_64.deb
