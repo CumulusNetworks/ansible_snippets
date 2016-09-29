@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    vagrant_vers: 1.8.5
+    vagrant_vers: 1.8.4
     vagrant_url: https://releases.hashicorp.com/vagrant/{{ vagrant_vers }}/vagrant_{{ vagrant_vers }}_x86_64.deb
   tasks:
   - name: "Determining Whether Host is Supported or Not..."
