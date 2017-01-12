@@ -1,0 +1,13 @@
+---
+- hosts: all
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Enable en_AU.UTF-8 Locale
+      lineinfile: dest=/etc/locale.gen line="en_AU.UTF-8 UTF-8" regexp=^.*en_AU.UTF-8
+
+    - name: Regenerate Locales
+      shell: locale-gen
+
