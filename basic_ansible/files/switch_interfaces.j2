@@ -31,3 +31,5 @@ iface {{ network }}
     bridge-ports {{ " ".join(intvars.networks[network].ports) }}
     address {{ intvars.networks[network].ip }}
 {% endfor %}
+
+source /etc/network/interfaces.d/*

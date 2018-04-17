@@ -1,0 +1,35 @@
+---
+- hosts: leaf:spine
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+
+    - name: Allow Sourcing of Configuraiton files From /etc/network/interfaces.d Directory
+      lineinfile: dest=/etc/network/interfaces state=present line="source /etc/network/interfaces.d/*"
+
+    - name: Removing Eth0 from /etc/network/interfaces
+      lineinfile: dest=/etc/network/interfaces state=absent regexp={{ item }}
+      with_items: 
+        - "^.*auto eth0"
+        - "^.*iface eth0 inet dhcp"
+        - "^.*alias MGMT Interface"
+
+    - name: Add MGMT VRF Config File (/etc/network/interfaces.d/mgmt_vrf.cfg)
+      blockinfile:
+        create: yes
+        dest: /etc/network/interfaces.d/mgmt_vrf.cfg
+        block: |
+          auto mgmt
+          iface mgmt
+              address 127.0.0.1/8
+              vrf-table auto
+          auto eth0
+          iface eth0 inet dhcp
+              alias MGMT Interface
+              vrf mgmt
+
+#    - name: Restart Switchd
+#      service: name=switchd state=restarted
+

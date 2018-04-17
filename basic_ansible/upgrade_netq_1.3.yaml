@@ -1,0 +1,39 @@
+- name: Upgrade NetQ to 1.3
+  hosts: spine,leaf
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: Copy Apt Sources.list for Cumulus Apps repo
+    copy:
+      content: |
+          deb http://apps3.cumulusnetworks.com/repos/deb CumulusLinux-3 netq-1.3
+      dest: /etc/apt/sources.list.d/cumulus-apps.list 
+
+  - name: Install NetQ
+    apt: 
+      name: cumulus-netq
+      state: latest
+      update_cache: yes
+
+  - name: Restart the netq-agent
+    service: name=netq-agent state=restarted
+
+- name: Upgrade NetQ Agents on Host to v1.3
+  hosts: server
+  become: yes
+  tasks:
+  - name: Copy Apt Sources.list for Cumulus Apps repo
+    copy:
+      content: |
+          deb [arch=amd64] https://apps3.cumulusnetworks.com/repos/deb xenial netq-1.3
+      dest: /etc/apt/sources.list.d/cumulus-apps.list
+
+  - name: Install NetQ
+    apt:
+      name: cumulus-netq
+      state: latest
+      update_cache: yes
+      allow_unauthenticated: yes
+
+  - name: Restart the netq-agent
+    service: name=netq-agent state=restarted

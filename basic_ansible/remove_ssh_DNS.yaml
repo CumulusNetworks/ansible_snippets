@@ -1,0 +1,14 @@
+vagrant@oob-mgmt-server:~$ cat /home/cumulus/Monash/utility_playbooks/remove_sshdns.yaml 
+---
+- hosts: spine:leaf
+  remote_user: cumulus
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: SSH DNS Removal
+      shell: echo "UseDNS no" >> /etc/ssh/sshd_config
+
+    - name: restart SSH
+      service: name=ssh state=restarted
+
