@@ -1,28 +1,29 @@
 ---
-- hosts: all            # Run this against all Hosts in the ansible inventory file
-  become: yes           # Becomes the Root user during execution on the remote device
-  remote_user: cumulus  # Specifying the Remote User used for SSH
-  gather_facts: no      # Don't query the remote node for any identifying information before running tasks
+- hosts: all
+  become: yes
+  gather_facts: no
   vars:
     ansible_user: "cumulus"
     ansible_ssh_pass: "CumulusLinux!"
     ansible_become_pass: "CumulusLinux!"
-  tasks:                # All of these tasks are executed on the remote device
+    local_user: "{{ lookup('env', 'USER') }}"
+  tasks:
     - name: GENERATE SSH KEY
-      shell: ls /home/vagrant/.ssh/id_rsa || /usr/bin/ssh-keygen -b 2048 -t rsa -f /home/vagrant/.ssh/id_rsa -q -N ""
+      shell: ls /home/{{local_user}}/.ssh/id_rsa || /usr/bin/ssh-keygen -b 2048 -t rsa -f /home/{{local_user}}/.ssh/id_rsa -q -N ""
       become: no
       delegate_to: localhost
       ignore_errors: yes
+      run_once: yes
 
     - name: Make a ".ssh" Directory for the Cumulus user
       file: path=/home/cumulus/.ssh state=directory mode=0755
 
     - name: Copy our Authorized Key to the Cumulus user
-      copy: src=/home/vagrant/.ssh/id_rsa.pub dest=/home/cumulus/.ssh/authorized_keys
+      copy: src=/home/{{local_user}}/.ssh/id_rsa.pub dest=/home/cumulus/.ssh/authorized_keys
 
     - name: Make a ".ssh" Directory for the Root user
       file: path=/root/.ssh state=directory mode=0755
 
     - name: Copy our Authorized Key to the Root user
-      copy: src=/home/vagrant/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys
+      copy: src=/home/{{local_user}}/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys
 
