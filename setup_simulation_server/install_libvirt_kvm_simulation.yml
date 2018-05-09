@@ -1,0 +1,88 @@
+---
+- hosts: all
+  vars:
+    vagrant_vers: 2.0.2
+    vagrant_url: https://releases.hashicorp.com/vagrant/{{ vagrant_vers }}/vagrant_{{ vagrant_vers }}_x86_64.deb
+  tasks:
+  - name: "Determining Whether Host is Running Ubuntu 16.04 or Not..."
+    command: uname -a
+    failed_when: (ansible_distribution != "Ubuntu" or ansible_distribution_version != "16.04")
+
+  - name: Run apt-get update
+    apt: update_cache=yes
+    become: true
+  
+  - name: Install packages for Libvirt and QEMU
+    apt: name={{item}} state=present
+    with_items:
+      - "libvirt-bin"
+      - "libvirt-dev"
+      - "qemu-utils"
+      - "qemu"
+      - "python-pip"
+    become: true
+
+  - name: Check that Vagrant is Installed
+    stat:
+      path: /usr/bin/vagrant
+    register: vagrant_path
+  
+  - name: Check Vagrant Version
+    shell: vagrant --version | cut -d ' ' -f2
+    register: installed_vagrant
+    when: vagrant_path.stat.exists
+  
+  - name: Display Installed Vagrant Version
+    debug: msg="Vagrant Version is {{ installed_vagrant.stdout }}"
+    when: vagrant_path.stat.exists
+  
+  - name: Download Vagrant DEB
+    get_url:
+      url="{{vagrant_url}}"
+      dest="/home/{{ ansible_user }}/"
+    when: (not vagrant_path.stat.exists) or (vagrant_vers != installed_vagrant.stdout)
+  
+  - name: Remove Existing Vagrant Plugins (in preparation for an upgrade).
+    shell: vagrant plugin expunge --force
+    when: (vagrant_path.stat.exists) and (vagrant_vers != installed_vagrant.stdout)
+  
+  - name: Install Vagrant
+    apt: deb=/home/{{ ansible_user }}/vagrant_{{ vagrant_vers }}_x86_64.deb
+    when: (not vagrant_path.stat.exists) or (vagrant_vers != installed_vagrant.stdout)
+    become: true
+  
+  - name: Detect Installed Plugins
+    shell: vagrant plugin list
+    register: vagrant_plugins
+  
+  - name: Install Plugins
+    shell: vagrant plugin install {{ item }}
+    with_items:
+      - "vagrant-libvirt"
+      - "vagrant-mutate"
+    when: ("vagrant-libvirt" not in vagrant_plugins.stdout) or
+          ("vagrant-mutate" not in vagrant_plugins.stdout)
+  
+  - name: Install PIP Dependencies (Used for Topology_Converter)
+    pip:
+      name: "{{item}}"
+    become: True
+    with_items:
+      - "setuptools"
+      - "pydotplus"
+      - "jinja2"
+      - "ipaddress"
+  
+  - name: Check CPU Virtualization Support
+    shell: /usr/sbin/kvm-ok
+    ignore_errors: yes
+    become: true
+    register: cpu_virt_support
+    tags:
+      - cpu_support
+  
+  - name: Display CPU Virtualization Support
+    debug: msg="{{ cpu_virt_support.stdout.split('\n') }}"
+    tags:
+      - cpu_support
+  
