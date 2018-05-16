@@ -1,0 +1,57 @@
+net add routing defaults datacenter
+net add routing service integrated-vtysh-config
+net add routing log syslog
+net add bgp autonomous-system 65103
+net add bgp bestpath as-path multipath-relax
+net add bgp neighbor swp51 interface remote-as external
+net add bgp neighbor swp52 interface remote-as external
+net add bgp ipv4 unicast network 10.0.30.0/24 
+net add bgp ipv4 unicast network 10.0.40.0/24 
+net add bgp ipv4 unicast network 10.255.255.3/32 
+net add snmp-server listening-address localhost
+net add dns nameserver ipv4 192.168.0.254
+net add ptp interface global
+net add ptp global slave-only 0
+net add ptp global priority1 255
+net add ptp global priority2 255
+net add ptp global domain-number 0
+net add ptp global logging-level 5
+net add ptp global path-trace-enabled 0
+net add ptp global use-syslog 1
+net add ptp global verbose 0
+net add ptp global summary-interval 0
+net add ptp global time-stamping hardware
+net add bond SERVER03 bond slaves swp1
+net add bond SERVER04 bond slaves swp2
+net add bond peerlink bond slaves swp49,swp50
+net add bond SERVER03 bridge access 30
+net add bond SERVER03 clag id 1
+net add bond SERVER04 bridge access 40
+net add bond SERVER04 clag id 2
+net add bridge bridge ports SERVER03,SERVER04,peerlink
+net add bridge bridge vids 30,40
+net add bridge bridge vlan-aware
+net add interface eth0 ip address dhcp
+net add interface peerlink.4094 clag backup-ip 192.168.0.14
+net add interface peerlink.4094 clag peer-ip 169.254.1.2
+net add interface peerlink.4094 clag priority 1000
+net add interface peerlink.4094 clag sys-mac 44:38:39:FF:00:02
+net add interface peerlink.4094 ip address 169.254.1.1/30
+net add interface swp1-2,49-50
+net add loopback lo ip address 10.255.255.3/32
+net add vlan 30 ip address 10.0.30.2/24
+net add vlan 30 ip address-virtual 00:00:00:00:1a:30 10.0.30.1/24
+net add vlan 30 vlan-id 30
+net add vlan 30 vlan-raw-device bridge
+net add vlan 40 ip address 10.0.40.2/24
+net add vlan 40 ip address-virtual 00:00:00:00:1a:40 10.0.40.1/24
+net add vlan 40 vlan-id 40
+net add vlan 40 vlan-raw-device bridge
+net add time zone Etc/UTC
+net add time ntp server 192.168.0.254 iburst
+net add time ntp source eth0
+net add dot1x radius accounting-port 1813
+net add dot1x eap-reauth-period 0
+net add dot1x radius authentication-port 1812
+net add dot1x mab-activation-delay 30
+net commit

@@ -1,6 +1,7 @@
 ---
-- hosts: all
+- hosts: leaf:spine
   become: yes
+  gather_facts: no
   vars:
       #Collect the Current date and time from the local system
       current_date: "{{ lookup('pipe', 'date +\"%F_%T\"') }}"

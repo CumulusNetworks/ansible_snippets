@@ -1,12 +1,13 @@
 ---
-- hosts: all
+- hosts: leaf:spine
   become: yes
+  gather_facts: no
   tasks:
     - name: run the net commands
       nclu:
         commands:
           - '{{item[4:]}}'
-      with_lines: cat configuration_backup/{{inventory_hostname}}/current_nclu_based_configuration
+      with_lines: cat configuration_storage/{{inventory_hostname}}/current_nclu_based_configuration
       # with_lines loops through each line in the file, and item[4:] strips off the 'net' in front since its redundant with nclu ansible module
     
     - name: commit the changes
