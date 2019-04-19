@@ -1,0 +1,20 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: COLLECT LLDP INFO in JSON Format
+      shell: net show lldp json
+      register: lldp_info_json
+  
+    - name: CONVERT TO AN ANSIBLE NATIVE VARIABLE
+      set_fact:
+        lldp_info: "{{lldp_info_json.stdout | from_json }}"
+
+        #    - debug: var=hostvars[ansible_hostname]['lldp_info']
+
+    - name: Build Graph
+      template: src=./graph.j2 dest=./topology.dot
+      run_once: true
+      delegate_to: localhost
+

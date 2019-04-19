@@ -1,0 +1,31 @@
+graph dc1 {
+{% for host in hostvars %}
+{% set hostvar = hostvars[host]['ansible_facts'] %}
+{%   if 'hostname' in hostvar %}
+  "{{hostvar['hostname']}}" [ version="{{hostvar['lsb']['release']}}" {% if hostvar['lsb']['id'] == 'Cumulus Linux' %} os="CumulusCommunity/cumulus-vx" {% endif %} ]
+{%   endif %}
+{% endfor %}
+
+{% set already_done = [] %}
+{% for host in hostvars %}
+{%   if 'lldp_info' in hostvars[host] %}
+
+{%     set hostlldp = hostvars[host]['lldp_info']['lldp'][0]['interface'] %}
+{%     for port in hostlldp %}
+{%       if 'port' in port and 'chassis' in port %}
+{%         set localport = port.name %}
+{%         set remotehost = port.chassis[0].name[0].value %}
+{%         set remoteport = port.port[0].id[0].value %}
+{%         if localport != 'vagrant' and remoteport != 'vagrant' %}
+{%         if '"%s":"%s"'%(host,localport) not in already_done and '"%s":"%s"'%(remotehost,remoteport) not in already_done %}
+            "{{host}}":"{{localport}}" -- "{{remotehost}}":"{{remoteport}}"
+{%           do already_done.append('"%s":"%s"'%(host,localport)) %}
+{%           do already_done.append('"%s":"%s"'%(remotehost,remoteport)) %}
+{%         endif %}
+{%         endif %}
+{%       endif %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+}
+
