@@ -13,7 +13,11 @@ graph dc1 {
 {%     set hostlldp = hostvars[host]['lldp_info']['lldp'][0]['interface'] %}
 {%     for port in hostlldp %}
 {%       if 'port' in port and 'chassis' in port %}
-{%         set localport = port.name %}
+{%         if 'name' in port %}
+{%           set localport = port.name %}
+{%         else %}
+{%           set localport = 'UNKNOWN' %}
+{%         endif %}
 {%         set remotehost = port.chassis[0].name[0].value %}
 {%         set remoteport = port.port[0].id[0].value %}
 {%         if localport != 'vagrant' and remoteport != 'vagrant' %}
