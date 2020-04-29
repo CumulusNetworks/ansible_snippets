@@ -1,6 +1,6 @@
 # DOT file Builder
 
-This simple Ansible script will create a (topology.dot)[https://docs.cumulusnetworks.com/display/DOCS/Prescriptive+Topology+Manager+-+PTM#PrescriptiveTopologyManager-PTM-configuringConfigurePTM] file which can be used for PTM or to create simulations with a tool like (topology_converter)[https://github.com/CumulusNetworks/topology_converter].
+This simple Ansible script will create a [topology.dot](https://docs.cumulusnetworks.com/display/DOCS/Prescriptive+Topology+Manager+-+PTM#PrescriptiveTopologyManager-PTM-configuringConfigurePTM) file which can be used for PTM or to create simulations with a tool like [topology_converter](https://github.com/CumulusNetworks/topology_converter).
 
 *Example*
 ```
