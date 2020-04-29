@@ -18,14 +18,16 @@ graph dc1 {
 {%         else %}
 {%           set localport = 'UNKNOWN' %}
 {%         endif %}
-{%         set remotehost = port.chassis[0].name[0].value %}
-{%         set remoteport = port.port[0].id[0].value %}
-{%         if localport != 'vagrant' and remoteport != 'vagrant' %}
-{%         if '"%s":"%s"'%(host,localport) not in already_done and '"%s":"%s"'%(remotehost,remoteport) not in already_done %}
-            "{{host}}":"{{localport}}" -- "{{remotehost}}":"{{remoteport}}"
-{%           do already_done.append('"%s":"%s"'%(host,localport)) %}
-{%           do already_done.append('"%s":"%s"'%(remotehost,remoteport)) %}
-{%         endif %}
+{%         if 'name' in port.chassis[0] %}
+{%           set remotehost = port.chassis[0].name[0].value %}
+{%           set remoteport = port.port[0].id[0].value %}
+{%           if localport != 'vagrant' and remoteport != 'vagrant' %}
+{%             if '"%s":"%s"'%(host,localport) not in already_done and '"%s":"%s"'%(remotehost,remoteport) not in already_done %}
+           "{{host}}":"{{localport}}" -- "{{remotehost}}":"{{remoteport}}"
+{%               do already_done.append('"%s":"%s"'%(host,localport)) %}
+{%               do already_done.append('"%s":"%s"'%(remotehost,remoteport)) %}
+{%             endif %}
+{%           endif %}
 {%         endif %}
 {%       endif %}
 {%     endfor %}
