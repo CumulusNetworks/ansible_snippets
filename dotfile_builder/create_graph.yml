@@ -1,7 +1,6 @@
 ---
 - hosts: all
   gather_facts: true
-  become: true
   tasks:
     - name: COLLECT LLDP INFO in JSON Format
       shell: net show lldp json
